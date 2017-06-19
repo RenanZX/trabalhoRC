@@ -1,6 +1,7 @@
 #include <stdio.h>
 #ifdef __WIN32__
 #include <winsock2.h>
+#include <string.h>
  
 #pragma comment(lib,"ws2_32.lib") /*Winsock Biblioteca*/
  
@@ -36,9 +37,17 @@ void StartCliente(){
     si_other.sin_family = AF_INET;
     si_other.sin_port = htons(PORTA);
     si_other.sin_addr.S_un.S_addr = inet_addr(SERVER);
+
+    //Faz o Bind
+    if( bind(s ,(struct sockaddr *)&si_other , sizeof(si_other)) == SOCKET_ERROR)
+    {
+        printf("Falha no bind com codigo de erro : %d" , WSAGetLastError());
+        exit(EXIT_FAILURE);
+    }
+    puts("Bind feito");
      
     //começa a comunicacao com servidor
-    while(1)
+    while(strcmp(buf,"fim")!=0)
     {
         printf("Digite uma mensagem : ");
         gets(message);
@@ -89,10 +98,13 @@ void StartCliente(){
   		serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
   		memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);  
 
+  		/*Faz o bind do socket com endereço da struct*/
+  		bind(clientSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
+
   		/*Inicializa o tamanho da variavel que será ultilizada depois*/
   		addr_size = sizeof serverAddr;
 
-  		while(1){
+  		while((strcmp(buffer,"FIM")!=0)&&(strcmp(buffer,"fim")!=0)){
     		printf("Digite a mensagem que sera enviada ao servidor:\n");
     		fgets(buffer,1024,stdin);
     		printf("Voce digitou: %s",buffer);
@@ -106,7 +118,11 @@ void StartCliente(){
         	nBytes = recvfrom(clientSocket,buffer,1024,0,NULL, NULL);
 
     		printf("Mensagem recebida do servidor: %s\n",buffer);
-
+    		if((strcmp(buffer,"FIM")!=0)&&(strcmp(buffer,"fim")!=0)){
+    			printf("digite 'fim' caso queira encerrar a conexao");	
+    		}else{
+    			printf("servidor encerrou a conexao");
+    		}
   		}
 	}
 

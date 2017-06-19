@@ -44,7 +44,7 @@ void IniciarServer(){
     puts("Bind feito");
  
     //Espera para o recebimento de dados
-    while(1)
+    while(buf!="fim")
     {
         printf("Esperando por Dados...");
         fflush(stdout);
@@ -62,6 +62,10 @@ void IniciarServer(){
         //imprime os detalhes do cliente e os dados recebidos
         printf("Pacote recebido de %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
         printf("Dados: %s\n" , buf);
+        memset(buf,'\0',BUFFLEN);
+        printf("Digite o feedback ao cliente:");
+        gets(buf);
+        getchar();
          
         //retorna ao cliente com os mesmos dados que foram enviados pelo mesmo
         if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == SOCKET_ERROR)
@@ -82,10 +86,11 @@ void IniciarServer(){
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <ctype.h>
+#define SIZEBUF 1024
 
 	void IniciarServer(){
 		int udpSocket, nBytes;
-  		char buffer[1024];
+  		char buffer[SIZEBUF];
   		struct sockaddr_in serverAddr;
   		struct sockaddr_storage serverStorage;
   		socklen_t addr_size;
@@ -107,23 +112,30 @@ void IniciarServer(){
   		addr_size = sizeof serverStorage;
 
   		/*enquanto estiver rodando*/
-  		while(1){
+  		while((strcmp(buffer,"FIM")!=0)&&(strcmp(buffer,"fim")!=0)){
   			printf("servidor Iniciado...");
     		/* Tenta receber um datagrama UDP. O endereço e a porta do cliente 
     		que iniciou o pedido ira ser passada para a variavel serverStorage*/
-    		nBytes = recvfrom(udpSocket,buffer,1024,0,(struct sockaddr *)&serverStorage, &addr_size);
+    		nBytes = recvfrom(udpSocket,buffer,SIZEBUF,0,(struct sockaddr *)&serverStorage, &addr_size);
 
-    		printf("msg recebida:%s",buffer);
+    		printf("mensagem recebida:%s",buffer);
     		printf("pressione enter para continuar...\n");
     		getchar();
-
-    		/*Converte a mensagem recebida em letras maiúsculas*/
-    		for(i=0;i<nBytes-1;i++){
-      			buffer[i] = toupper(buffer[i]);
-      		}
-
-    		/*Envia a mensagem de volta para o cliente, ultilizando serverStorage como endereço*/
-    		sendto(udpSocket,buffer,nBytes,0,(struct sockaddr *)&serverStorage,addr_size);
+        	memset(buffer,'\0', SIZEBUF);
+        	if((strcmp(buffer,"FIM")!=0)&&(strcmp(buffer,"fim")!=0)){
+        		printf("digite uma mensagem:");
+    			fgets(buffer,sizeof(buffer),stdin);
+    			getchar();
+    			/*Converte a mensagem recebida em letras maiúsculas*/
+    			for(i=0;i<nBytes-1;i++){
+      				buffer[i] = toupper(buffer[i]);
+      			}
+    			/*Envia a mensagem de volta para o cliente, ultilizando serverStorage como endereço*/
+    			sendto(udpSocket,buffer,nBytes,0,(struct sockaddr *)&serverStorage,addr_size);
+        	
+        	}else{
+        		printf("cliente encerrou a conexao");
+        	}
   		}
 	}
 #endif
