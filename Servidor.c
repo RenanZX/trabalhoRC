@@ -6,7 +6,7 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 #define BUFFTAM 1024
-#define PORTA 3333
+#define PORTA 33333
 
 void terminar(char *s)
 {
