@@ -7,7 +7,7 @@
 
 #define SERVER "127.0.0.1"
 #define BUFFTAM 1024  //Tamanho maximo do buffer
-#define PORTA 8888   //A porta na qual sera enviado os dados
+#define PORTA 3333   //A porta na qual sera enviado os dados
 
 void terminar(char *s)
 {
